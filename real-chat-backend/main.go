@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -15,5 +16,6 @@ func main() {
 		Addr:    ":80",
 	}
 
+	fmt.Println("Server is running on port :80")
 	log.Fatal(srv.ListenAndServe())
 }
