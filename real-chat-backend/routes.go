@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
+	"github.com/oscarvo29/real-chat-backend/controllers"
 )
 
 func (app *Config) Routes() http.Handler {
@@ -19,10 +20,13 @@ func (app *Config) Routes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	mux.Get("/", app.Index)
-	mux.Get("/active-users", app.GetActiveUsers)
-	mux.Post("/login", app.Login)
-	mux.Post("/signup", app.SignUp)
+	mux.Route("/auth", func(r chi.Router) {
+		r.Post("/login", controllers.LoginHandler)
+	})
+
+	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("index page"))
+	})
 
 	return mux
 }
