@@ -27,9 +27,7 @@ export default function Login() {
         }
         let res = await axios.post('http://127.0.0.1:80/auth/login', user, config)
         if (res.status === 200) {
-            console.log(res.data)
-            let cookieValue = `${res.data.name}:${res.data.password}`
-            setCookie('auth', cookieValue, 1)
+            setCookie('auth', res.data, 1)
             redirect('/')
         }
 

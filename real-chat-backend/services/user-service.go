@@ -8,7 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func ValidateUser(clientUser models.User) (bool, error) {
+func ValidateUser(clientUser *models.User) (bool, error) {
 	databaseUser, err := repositories.GetUserFromName(clientUser.Name)
 	if err != nil {
 		return false, err
@@ -24,6 +24,7 @@ func ValidateUser(clientUser models.User) (bool, error) {
 		}
 	}
 
+	clientUser.Uuid = databaseUser.Uuid
 	return true, nil
 }
 

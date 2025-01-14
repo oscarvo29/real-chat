@@ -17,14 +17,19 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	passwordMatched, err := services.ValidateUser(usr)
+	passwordMatched, err := services.ValidateUser(&usr)
 	if err != nil {
 		panic(err)
 	}
 
 	if passwordMatched {
+		jwt, err := utils.GenerateToken(usr.Name, usr.Uuid)
+		if err != nil {
+			panic(err)
+		}
 		w.Header().Set("Content-Type", "application/json")
-		_, err = w.Write([]byte("user-is-logged-in-succesfully"))
+
+		_, err = w.Write([]byte(jwt))
 		if err != nil {
 			panic(err)
 		}
@@ -51,7 +56,11 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write([]byte(fmt.Sprintf("User was created with ID: %v", newUsr.Uuid)))
+	jwt, err := utils.GenerateToken(newUsr.Name, newUsr.Uuid)
+	if err != nil {
+		panic(err)
+	}
+	_, err = w.Write([]byte(jwt))
 	if err != nil {
 		log.Fatal(err)
 	}
