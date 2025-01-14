@@ -38,7 +38,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write([]byte(fmt.Sprintf("User was created with ID: %v", newUsr.Id)))
+	_, err = w.Write([]byte(fmt.Sprintf("User was created with ID: %v", newUsr.Uuid)))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,9 +1,9 @@
 package models
 
 type User struct {
-	Id       int64  `json:"id"`
+	Uuid     string `json:"uuid"`
 	Name     string `json:"name"`
-	Password string `json:password`
+	Password string `json:"password"`
 }
 
 func NewUser(name, password string) *User {

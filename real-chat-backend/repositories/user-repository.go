@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 
+	"github.com/google/uuid"
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -10,19 +11,21 @@ import (
 )
 
 func SaveUser(user *models.User) error {
-	query := `INSERT INTO users (name, password) VALUES ($1, $2)`
+	uuidString := uuid.New().String()
+
+	query := `INSERT INTO users (uuid, name, password) VALUES ($1, $2, $3)`
 	stmt, err := DB.Prepare(query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Name, user.Password)
+	_, err = stmt.Exec(uuidString, user.Name, user.Password)
 	if err != nil {
 		return err
 	}
 
-	user.Id = 3
+	user.Uuid = uuidString
 	return nil
 }
 

@@ -40,11 +40,11 @@ export default function Login() {
             <FormField submition={login} page="login">
                 
                 <label className='col-span-2' htmlFor="name">Name  </label>
-                <input className='col-span-3' type="text" name="name" id='nameInp'/>
+                <input className='col-span-3 text-black' type="text" name="name" id='nameInp'/>
 
             
                 <label className='col-span-2' htmlFor="password">Password  </label>
-                <input className='col-span-3' type="password" name="password" id='passwordInp'/>
+                <input className='col-span-3 text-black' type="password" name="password" id='passwordInp'/>
             
             </FormField>
         </div>
