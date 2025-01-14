@@ -8,10 +8,15 @@ import (
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/oscarvo29/real-chat-backend/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func SaveUser(user *models.User) error {
 	uuidString := uuid.New().String()
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+	if err != nil {
+		return err
+	}
 
 	query := `INSERT INTO users (uuid, name, password) VALUES ($1, $2, $3)`
 	stmt, err := DB.Prepare(query)
@@ -20,7 +25,7 @@ func SaveUser(user *models.User) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(uuidString, user.Name, user.Password)
+	_, err = stmt.Exec(uuidString, user.Name, hashedPassword)
 	if err != nil {
 		return err
 	}
