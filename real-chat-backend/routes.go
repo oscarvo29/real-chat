@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/oscarvo29/real-chat-backend/controllers"
+	"github.com/oscarvo29/real-chat-backend/middleware"
 )
 
 func (app *Config) Routes() http.Handler {
@@ -23,6 +24,13 @@ func (app *Config) Routes() http.Handler {
 	mux.Route("/auth", func(r chi.Router) {
 		r.Post("/login", controllers.LoginHandler)
 		r.Post("/signup", controllers.SignUpHandler)
+	})
+
+	mux.Group(func(r chi.Router) {
+		r.Use(middleware.AuthMiddleware)
+		r.Route("/users", func(r chi.Router) {
+			r.Get("/all-users", controllers.GetAllUsers)
+		})
 	})
 
 	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {

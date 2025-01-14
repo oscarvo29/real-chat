@@ -3,7 +3,7 @@ package models
 type User struct {
 	Uuid     string `json:"uuid"`
 	Name     string `json:"name"`
-	Password string `json:"password"`
+	Password string `json:"-"`
 }
 
 func NewUser(name, password string) *User {

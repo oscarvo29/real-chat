@@ -47,7 +47,7 @@ func GetAllUsers() ([]*models.User, error) {
 
 	for rows.Next() {
 		var user models.User
-		err := rows.Scan(&user.Name, &user.Password)
+		err := rows.Scan(&user.Uuid, &user.Name, &user.Password)
 		if err != nil {
 			return nil, err
 		}

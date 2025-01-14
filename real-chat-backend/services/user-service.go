@@ -32,3 +32,7 @@ func SaveUser(usr *models.User) error {
 	err := repositories.SaveUser(usr)
 	return err
 }
+
+func GetAllUsers() ([]*models.User, error) {
+	return repositories.GetAllUsers()
+}
