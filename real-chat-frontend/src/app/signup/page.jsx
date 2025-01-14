@@ -24,7 +24,7 @@ export default function Signup() {
                 'Content-type': 'application/json'
             }
         }
-        const res = await axios.post('http://127.0.0.1:80/signup', user, config)
+        const res = await axios.post('http://127.0.0.1:80/auth/signup', user, config)
 
         if (res.status === 200 ) {
             let cookieValue = `${res.data.name}:${res.data.password}`

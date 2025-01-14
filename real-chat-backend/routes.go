@@ -22,6 +22,7 @@ func (app *Config) Routes() http.Handler {
 
 	mux.Route("/auth", func(r chi.Router) {
 		r.Post("/login", controllers.LoginHandler)
+		r.Post("/signup", controllers.SignUpHandler)
 	})
 
 	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {

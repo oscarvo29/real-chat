@@ -3,28 +3,26 @@ package repositories
 import (
 	"context"
 
+	_ "github.com/jackc/pgconn"
+	_ "github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/oscarvo29/real-chat-backend/models"
 )
 
 func SaveUser(user *models.User) error {
-	query := `INERT INTO users (name, password) VALUES ($1, $2)`
+	query := `INSERT INTO users (name, password) VALUES ($1, $2)`
 	stmt, err := DB.Prepare(query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(user.Name, user.Password)
+	_, err = stmt.Exec(user.Name, user.Password)
 	if err != nil {
 		return err
 	}
 
-	uid, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	user.Id = uid
+	user.Id = 3
 	return nil
 }
 

@@ -1,24 +1,18 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 
 	"github.com/oscarvo29/real-chat-backend/models"
+	"github.com/oscarvo29/real-chat-backend/services"
+	"github.com/oscarvo29/real-chat-backend/utils"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Login have been hit")
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	var usr models.User
-	err = json.Unmarshal(body, &usr)
+	err := utils.ParseJsonObject(r.Body, &usr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,3 +24,22 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func SignUpHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Sign up have been hit !!! ")
+	var newUsr models.User
+	err := utils.ParseJsonObject(r.Body, &newUsr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = services.SaveUser(&newUsr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write([]byte(fmt.Sprintf("User was created with ID: %v", newUsr.Id)))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
