@@ -17,11 +17,24 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write([]byte("user-not-found"))
+	passwordMatched, err := services.ValidateUser(usr)
 	if err != nil {
 		panic(err)
 	}
+
+	if passwordMatched {
+		w.Header().Set("Content-Type", "application/json")
+		_, err = w.Write([]byte("user-is-logged-in-succesfully"))
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+	_, err = w.Write([]byte("Password wasn't correct."))
+	if err != nil {
+		panic(err)
+	}
+
 }
 
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {

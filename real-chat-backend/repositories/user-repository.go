@@ -73,3 +73,19 @@ func ValidateLogin(name, password string) (*models.User, error) {
 
 	return &user, nil
 }
+
+func GetUserFromName(name string) (*models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	query := `SELECT * FROM users WHERE name = $1`
+	var user models.User
+	row := DB.QueryRowContext(ctx, query, name)
+
+	err := row.Scan(&user.Uuid, &user.Name, &user.Password)
+	if err != nil {
+		return &user, err
+	}
+
+	return &user, nil
+}
