@@ -34,13 +34,13 @@ func SaveUser(user *models.User) error {
 	return nil
 }
 
-func GetAllUsers() ([]*models.User, error) {
+func GetAllUsers(uuid string) ([]*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	var users []*models.User
-	query := `SELECT * FROM users`
-	rows, err := DB.QueryContext(ctx, query)
+	query := `SELECT * FROM users WHERE uuid <> $1`
+	rows, err := DB.QueryContext(ctx, query, uuid)
 	if err != nil {
 		return nil, err
 	}

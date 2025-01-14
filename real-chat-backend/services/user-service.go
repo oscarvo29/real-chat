@@ -33,6 +33,6 @@ func SaveUser(usr *models.User) error {
 	return err
 }
 
-func GetAllUsers() ([]*models.User, error) {
-	return repositories.GetAllUsers()
+func GetAllUsers(uuid string) ([]*models.User, error) {
+	return repositories.GetAllUsers(uuid)
 }

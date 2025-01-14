@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -17,7 +18,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		if uuid != "" {
-			next.ServeHTTP(w, r)
+			ctx := context.WithValue(r.Context(), utils.UuidKey, uuid)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 	})
 }
