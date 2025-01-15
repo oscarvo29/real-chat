@@ -37,6 +37,13 @@ func (app *Config) Routes() http.Handler {
 		})
 	})
 
+	mux.Group(func(r chi.Router) {
+		r.Use(middleware.AuthMiddleware)
+		r.Route("/messages", func(r chi.Router) {
+			r.Post("/send-message", controllers.NewMessage)
+		})
+	})
+
 	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("index page"))
 	})

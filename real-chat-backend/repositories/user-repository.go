@@ -12,7 +12,8 @@ import (
 )
 
 func SaveUser(user *models.User) error {
-	uuidString := uuid.New().String()
+	// uuidString := uuid.New().String()
+	uuid := uuid.New()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
 	if err != nil {
 		return err
@@ -25,12 +26,12 @@ func SaveUser(user *models.User) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(uuidString, user.Name, hashedPassword)
+	_, err = stmt.Exec(uuid, user.Name, hashedPassword)
 	if err != nil {
 		return err
 	}
 
-	user.Uuid = uuidString
+	user.Uuid = uuid
 	return nil
 }
 

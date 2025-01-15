@@ -9,5 +9,9 @@ const checkForCookie = (name) => {
 
 }
 
+const getCookie = (fieldName) => {
+    document.cookie
+}
+
 
 export default setCookie

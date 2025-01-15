@@ -23,7 +23,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if passwordMatched {
-		jwt, err := utils.GenerateToken(usr.Name, usr.Uuid)
+		jwt, err := utils.GenerateToken(usr.Name, usr.Uuid.String())
 		if err != nil {
 			panic(err)
 		}
@@ -56,7 +56,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	jwt, err := utils.GenerateToken(newUsr.Name, newUsr.Uuid)
+	jwt, err := utils.GenerateToken(newUsr.Name, newUsr.Uuid.String())
 	if err != nil {
 		panic(err)
 	}
