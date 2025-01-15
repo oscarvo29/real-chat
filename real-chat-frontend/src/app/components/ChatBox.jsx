@@ -8,13 +8,18 @@ import Cookies from 'js-cookie'
 export default function ChatBox({ users }) {
     const [chatChosen, setChatChosen] = useState(false)
     const [activeChat, setActiveChat] = useState({})
+    console.log("active chat: ", activeChat)
+    console.log("Chat is chosen: ", chatChosen)
 
     const handleUserClick = (userIndex) => {
         setActiveChat(users[userIndex])
     }
 
     useEffect(() => {
-        setChatChosen(true)
+        // checks wether or not, an active chat have been chosen. 
+        if (Object.keys(activeChat).length !== 0) {
+            setChatChosen(true)
+        }
     }, [activeChat])
 
     const sendMessage = async (e) => {
