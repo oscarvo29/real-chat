@@ -2,38 +2,44 @@ import React from 'react'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import axios from 'axios'
+import ChatBox from './components/ChatBox'
+
+
+
 
 export default async function page() {
   const cookieStore = await cookies()
   const auth = cookieStore.get('auth')
-  let users = []
 
   if (auth === undefined) {
     redirect('/login')
   }
 
+  let users = []
+
+
   const res = await axios.get('http://127.0.0.1:80/users/all-users', {
-    headers: {
-      'Authorization': auth.value
-    }
-  })
+      headers: {
+        'Authorization': auth.value
+      }
+    })
 
   if (res.status === 200) {
     users = res.data
   }
 
-  return (
-    <div>
-      
-      <h2>Index Page:</h2>
+  const updateActiveUser = (userIdx) => {
+    activeChat = users[userIdx]
+  }
 
-      {users.map((user, index) => {
-          return (
-            <div key={index} className="">
-              <h2>{user.name}</h2>
-            </div> 
-          )
-      })}
+  return (
+    <div className='mx-auto w-1/2 grid grid-cols-5 gap-4'>
+      
+      <h2 className='col-span-5 pt-5 mt-5 text-xl'>Index Page</h2>
+
+      <ChatBox users={users}/>
+
+      
     </div>
   )
 }
