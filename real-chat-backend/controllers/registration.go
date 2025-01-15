@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -43,7 +42,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Sign up have been hit !!! ")
 	var newUsr models.User
 	err := utils.ParseJsonObject(r.Body, &newUsr)
 	if err != nil {

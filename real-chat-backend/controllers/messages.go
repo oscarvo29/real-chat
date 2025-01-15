@@ -49,3 +49,46 @@ func NewMessage(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 }
+
+func ChatHistory(w http.ResponseWriter, r *http.Request) {
+	senderUuidString, ok := r.Context().Value(utils.UuidKey).(string)
+	if !ok {
+		http.Error(w, "Something went wrong with the server, when trying to parse the uuid.", http.StatusInternalServerError)
+	}
+
+	if senderUuidString == "" {
+		http.Error(w, "user not authorized", http.StatusUnauthorized)
+	}
+
+	senderUuid, err := uuid.Parse(senderUuidString)
+	if err != nil {
+		http.Error(w, "user id is not correct.", http.StatusUnauthorized)
+	}
+
+	var chatHistoryRequest models.ChatHistory
+	err = utils.ParseJsonObject(r.Body, &chatHistoryRequest)
+	if err != nil {
+		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+	}
+
+
+
+	chatHistory, err := services.GetAllChatMessages(senderUuid, chatHistoryRequest.ReceiverUuid)
+	if err != nil {
+		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+	}
+	jsonData, err := json.Marshal(chatHistory)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	_, err = w.Write(jsonData)
+	if err != nil {
+		panic(err)
+	}
+}

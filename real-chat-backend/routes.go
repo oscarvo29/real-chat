@@ -41,6 +41,7 @@ func (app *Config) Routes() http.Handler {
 		r.Use(middleware.AuthMiddleware)
 		r.Route("/messages", func(r chi.Router) {
 			r.Post("/send-message", controllers.NewMessage)
+			r.Post("/get-chat-history", controllers.ChatHistory)
 		})
 	})
 

@@ -13,7 +13,6 @@ type Config struct{}
 
 func main() {
 	repositories.GetConnection(utils.DSN)
-	fmt.Println(utils.DSN)
 
 	app := Config{}
 
