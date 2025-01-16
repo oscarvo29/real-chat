@@ -47,7 +47,6 @@ export default function ChatBox({ users }) {
             setChatChosen(true)
             FetchChatHistory(activeChat.uuid).then((data) => {
                 if (data) {
-                    console.log(data    )
                     setChatLog((prev) => [...prev, ...data])
                 }
             })
