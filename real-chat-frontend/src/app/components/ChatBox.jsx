@@ -4,60 +4,75 @@ import React, { useState, useEffect } from 'react'
 import UserButtons from './UserButtons'
 import axios from 'axios'
 import Cookies from 'js-cookie'
+
 import {FetchChatHistory, SendChatRequest} from '../utils/chat-utils'
 import ChatBubble from './ChatBubble'
+import { GetSocketConnection } from '../utils/socket'
+
+
 
 export default function ChatBox({ users }) {
     const [chatChosen, setChatChosen] = useState(false)
     const [activeChat, setActiveChat] = useState({})
-    const [ chatLog, setChatLog] = useState([])
+    const [chatLog, setChatLog] = useState([])
+    const [input, setInput] = useState("")
+    const [socket, setSocket] = useState(null)
+
     
     
+
+    useEffect(() => {
+        const ws = GetSocketConnection()
+        setSocket(ws)
+
+        ws.onmessage = (event) => {
+            if (event.data) {
+                let msg = JSON.parse(event.data)
+                setChatLog((prev) => [...prev, msg])
+            }
+        }
+    
+        return () => {
+            ws.close(); // Cleanup connection when the component unmounts
+        };
+    }, [])
 
     const handleUserClick = async (userIndex) => {
-        setActiveChat(users[userIndex])
-        
+        setActiveChat(users[userIndex]) 
     }
-
-    /*
-    
-    message_id: "72aa9ade-9bf1-4339-939c-b4db2018ceb7"
-​​
-message_value: "hey mate!"
-​​
-read: false
-​​
-read_at: Object { Time: "0001-01-01T00:00:00Z", Valid: false }
-​​
-receiver_uuid: "f9d75903-9179-4865-adb1-13c22503417a"
-​​
-send_time: "2025-01-15T16:37:47.708718Z"
-​​
-sender_uuid: "c1d9a936-275b-4cb4-88b4-3452ff76de51"
-
-    */
 
     useEffect(() => {
         // checks wether or not, an active chat have been chosen. 
         if (Object.keys(activeChat).length !== 0) {
             setChatChosen(true)
             FetchChatHistory(activeChat.uuid).then((data) => {
-                setChatLog(data)
-                console.log(data)
+                if (data) {
+                    console.log(data    )
+                    setChatLog((prev) => [...prev, ...data])
+                }
             })
         }
+
+
     }, [activeChat])
 
     const sendMessage = async (e) => {
         e.preventDefault()
         let msgField = document.querySelector('#msgField') 
-        let msg = msgField.value
+        let msgValue = msgField.value
         const jwtToken = Cookies.get("auth")
 
-        const statusCode = await SendChatRequest(msg, activeChat.uuid, jwtToken)
-        if (statusCode === 200) {
-            msgField.value = ""
+        const msg = {
+            "jwt": jwtToken,
+            "receiver_uuid": activeChat.uuid,
+            "message": msgValue,
         }
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(msg))
+        }
+
+        msgField.value = ""
     }
 
     return (
@@ -96,3 +111,22 @@ sender_uuid: "c1d9a936-275b-4cb4-88b4-3452ff76de51"
         </>
     )
 }
+
+
+  /*
+    
+    message_id: "72aa9ade-9bf1-4339-939c-b4db2018ceb7"
+​​
+message_value: "hey mate!"
+​​
+read: false
+​​
+read_at: Object { Time: "0001-01-01T00:00:00Z", Valid: false }
+​​
+receiver_uuid: "f9d75903-9179-4865-adb1-13c22503417a"
+​​
+send_time: "2025-01-15T16:37:47.708718Z"
+​​
+sender_uuid: "c1d9a936-275b-4cb4-88b4-3452ff76de51"
+
+    */

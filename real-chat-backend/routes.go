@@ -42,8 +42,11 @@ func (app *Config) Routes() http.Handler {
 		r.Route("/messages", func(r chi.Router) {
 			r.Post("/send-message", controllers.NewMessage)
 			r.Post("/get-chat-history", controllers.ChatHistory)
+
 		})
 	})
+
+	mux.HandleFunc("/chat-ws", controllers.HandleConnections)
 
 	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("index page"))

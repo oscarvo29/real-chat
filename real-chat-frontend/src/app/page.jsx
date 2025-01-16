@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import axios from 'axios'
 import ChatBox from './components/ChatBox'
+import Navbar from './components/Navbar'
 
 
 
@@ -35,7 +36,7 @@ export default async function page() {
   return (
     <div className='mx-auto w-1/2 grid grid-cols-5 gap-4'>
       
-      <h2 className='col-span-5 pt-5 mt-5 text-xl'>Index Page</h2>
+      <Navbar />
 
       <ChatBox users={users}/>
 

@@ -17,6 +17,12 @@ type Message struct {
 	ReadAt       sql.NullTime `json:"read_at"`
 }
 
+type ShortMessage struct {
+	SenderJWT    string    `json:"jwt"`
+	ReceiverUuid uuid.UUID `json:"receiver_uuid"`
+	Message      string    `json:"message"`
+}
+
 func NewMessage(senderUiid, receiverUuid uuid.UUID, messageValue string) *Message {
 	return &Message{
 		SenderUuid:   senderUiid,
