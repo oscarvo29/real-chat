@@ -14,6 +14,7 @@ export async function FetchChatHistory(receiverUuid) {
             'Authorization': jwtToken
         }
     }
+    
 
     const body = {
         'receiver_uuid': receiverUuid,

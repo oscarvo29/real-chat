@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -17,6 +18,14 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+type socketDataObj struct {
+	Event string      `json:"event"`
+	Jwt   string      `json:"jwt"`
+	Data  interface{} `json:"data"`
+}
+
+var clients = make(map[string]*websocket.Conn)
+
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Web socket have been hit?")
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -24,41 +33,139 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error when upgrading to websocket: ", err)
 		return
 	}
-	defer conn.Close()
-
-	fmt.Println("New WebSocket connection is openned.")
 
 	for {
-		var msg models.ShortMessage
-		err := conn.ReadJSON(&msg)
+		var socketConn socketDataObj
+		err := conn.ReadJSON(&socketConn)
 		if err != nil {
 			fmt.Println("Error when reading message: ", err)
 			return
 		}
 
-		uuidString, err := utils.VerifyToken(msg.SenderJWT)
-		if err != nil {
-			fmt.Println("Error when reading JWT: ", err)
-			return
-		}
-		uuid, err := uuid.Parse(uuidString)
-		if err != nil {
-			fmt.Println("Error when parsing UUID string: ", err)
-			return
-		}
-		newMsg := models.NewMessage(uuid, msg.ReceiverUuid, msg.Message)
-		err = services.SaveMessage(newMsg)
-		if err != nil {
-			fmt.Println("Error when saving new msg in the database: ", err)
-			return
+		switch socketConn.Event {
+		case "connection_open":
+
+			uuid, err := utils.VerifyToken(socketConn.Jwt)
+			if err != nil {
+				fmt.Println("Error when converting JWT: ", err)
+				conn.Close()
+				return
+			}
+			clients[uuid] = conn
+		case "message":
+
+			var shortMsg models.ShortMessage
+			jsonData, err := json.Marshal(socketConn.Data)
+			if err != nil {
+				fmt.Println("Error when trying to valite the data: ", err)
+				conn.Close()
+				return
+			}
+
+			err = json.Unmarshal(jsonData, &shortMsg)
+			if err != nil {
+				fmt.Println("Error when trying to valite the data after json convertion: ", err)
+				conn.Close()
+				return
+			}
+
+			uiidStr, err := utils.VerifyToken(shortMsg.SenderJWT)
+			if err != nil {
+				fmt.Println("error validating jwt token: ", err)
+				conn.Close()
+				return
+			}
+
+			mUuid, err := uuid.Parse(uiidStr)
+			if err != nil {
+				fmt.Println("error converting uuid string: ", err)
+				conn.Close()
+				return
+			}
+
+			newMsg := models.NewMessage(mUuid, shortMsg.ReceiverUuid, shortMsg.Message)
+			fmt.Println(newMsg)
+			err = services.SaveMessage(newMsg)
+			if err != nil {
+				fmt.Println("Error saving message: ", err)
+				conn.Close()
+				return
+			}
+
+			clientConn, ok := clients[newMsg.ReceiverUuid.String()]
+			if ok {
+				err = clientConn.WriteJSON(newMsg)
+				if err != nil {
+					fmt.Println("Error when writing msg to receiver: ", err)
+				}
+			}
+
+			err = conn.WriteJSON(newMsg)
+			if err != nil {
+				fmt.Println("Error when writing msg to sender: ", err)
+				conn.Close()
+				return
+			}
+		case "conn_close":
+			uuid, err := utils.VerifyToken(socketConn.Jwt)
+			if err != nil {
+				fmt.Println("Error when converting JWT: ", err)
+				conn.Close()
+				return
+			}
+			conn.Close()
+			delete(clients, uuid)
 		}
 
-		fmt.Println("Message received:", msg.Message)
-		err = conn.WriteJSON(newMsg)
-		if err != nil {
-			fmt.Println("Error when writing msg: ", err)
-			break
-		}
+		// err = conn.WriteJSON(newMsg)
+		// if err != nil {
+		// 	fmt.Println("Error when writing msg: ", err)
+		// 	break
+		// }
 	}
 
 }
+
+// func HandleConnections(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Println("Web socket have been hit?")
+// 	conn, err := upgrader.Upgrade(w, r, nil)
+// 	if err != nil {
+// 		fmt.Println("Error when upgrading to websocket: ", err)
+// 		return
+// 	}
+// 	defer conn.Close()
+
+// 	for {
+// 		var msg models.ShortMessage
+// 		err := conn.ReadJSON(&msg)
+// 		if err != nil {
+// 			fmt.Println("Error when reading message: ", err)
+// 			return
+// 		}
+
+// 		uuidString, err := utils.VerifyToken(msg.SenderJWT)
+// 		if err != nil {
+// 			fmt.Println("Error when reading JWT: ", err)
+// 			return
+// 		}
+// 		uuid, err := uuid.Parse(uuidString)
+// 		if err != nil {
+// 			fmt.Println("Error when parsing UUID string: ", err)
+// 			return
+// 		}
+// 		newMsg := models.NewMessage(uuid, msg.ReceiverUuid, msg.Message)
+// 		err = services.SaveMessage(newMsg)
+// 		if err != nil {
+// 			fmt.Println("Error when saving new msg in the database: ", err)
+// 			return
+// 		}
+
+// 		fmt.Println("Message received:", msg.Message)
+// 		err = conn.WriteJSON(newMsg)
+// 		if err != nil {
+// 			fmt.Println("Error when writing msg: ", err)
+// 			break
+// 		}
+// 	}
+
+// }

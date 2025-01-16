@@ -13,3 +13,4 @@ func SaveMessage(msg *models.Message) error {
 func GetAllChatMessages(activeUuid, chatUuid uuid.UUID) ([]*models.Message, error) {
 	return repositories.ChatHistory(activeUuid, chatUuid)
 }
+

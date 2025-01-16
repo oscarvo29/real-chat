@@ -22,11 +22,14 @@ export default function ChatBox({ users }) {
     
 
     useEffect(() => {
-        const ws = GetSocketConnection()
+        const jwtToken = Cookies.get("auth")
+
+        const ws = GetSocketConnection(jwtToken)
         setSocket(ws)
 
         ws.onmessage = (event) => {
             if (event.data) {
+                console.log(event)
                 let msg = JSON.parse(event.data)
                 setChatLog((prev) => [...prev, msg])
             }
@@ -61,10 +64,16 @@ export default function ChatBox({ users }) {
         let msgValue = msgField.value
         const jwtToken = Cookies.get("auth")
 
+        console.log(activeChat.uuid)
+
         const msg = {
+            "event": "message",
             "jwt": jwtToken,
-            "receiver_uuid": activeChat.uuid,
-            "message": msgValue,
+            "data": {
+                "jwt": jwtToken,
+                "receiver_uuid": activeChat.uuid,
+                "message": msgValue,
+            }
         }
 
         if (socket && socket.readyState === WebSocket.OPEN) {

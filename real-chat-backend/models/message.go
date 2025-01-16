@@ -8,13 +8,13 @@ import (
 )
 
 type Message struct {
-	MessageId    uuid.UUID    `json:"message_id"`
-	SenderUuid   uuid.UUID    `json:"sender_uuid"`
+	MessageId    uuid.UUID    `json:"message_id,omitempty"`
+	SenderUuid   uuid.UUID    `json:"sender_uuid,omitempty"`
 	ReceiverUuid uuid.UUID    `json:"receiver_uuid"`
 	MessageValue string       `json:"message_value"`
-	SendTime     time.Time    `json:"send_time"`
-	Read         bool         `json:"read"`
-	ReadAt       sql.NullTime `json:"read_at"`
+	SendTime     time.Time    `json:"send_time,omitempty"`
+	Read         bool         `json:"read,omitempty"`
+	ReadAt       sql.NullTime `json:"read_at,omitempty"`
 }
 
 type ShortMessage struct {
