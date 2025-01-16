@@ -119,22 +119,3 @@ export default function ChatBox({ users }) {
         </>
     )
 }
-
-
-  /*
-    
-    message_id: "72aa9ade-9bf1-4339-939c-b4db2018ceb7"
-​​
-message_value: "hey mate!"
-​​
-read: false
-​​
-read_at: Object { Time: "0001-01-01T00:00:00Z", Valid: false }
-​​
-receiver_uuid: "f9d75903-9179-4865-adb1-13c22503417a"
-​​
-send_time: "2025-01-15T16:37:47.708718Z"
-​​
-sender_uuid: "c1d9a936-275b-4cb4-88b4-3452ff76de51"
-
-    */
