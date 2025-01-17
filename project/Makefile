@@ -1,11 +1,11 @@
-BACKEND_BINARY=backendBinary
+BACKEND_BINARY=backendApp
 
 ## up: starts all the containers in the background without forcing build
 up:
 	@echo "starting containers"
 	docker compose up -d
 
-up_build: build_backend
+up_build: build_backend 
 	@echo "Stopping containers if running...."
 	docker compose down 
 	@echo "Building containers..."

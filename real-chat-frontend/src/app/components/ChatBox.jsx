@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import UserButtons from './UserButtons'
-import axios from 'axios'
 import Cookies from 'js-cookie'
 
 import {FetchChatHistory, SendChatRequest} from '../utils/chat-utils'

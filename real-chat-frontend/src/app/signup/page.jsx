@@ -5,6 +5,7 @@ import FormField from '../components/FormField'
 import axios from 'axios';
 import setCookie from '../utils/cookies';
 import { redirect } from 'next/navigation'
+import { GetURL } from '../utils/http-store';
 
 export default function Signup() {
 
@@ -24,7 +25,7 @@ export default function Signup() {
                 'Content-type': 'application/json'
             }
         }
-        const res = await axios.post('http://127.0.0.1:80/auth/signup', user, config)
+        const res = await axios.post(GetURL('auth/signup'), user, config)
 
         if (res.status === 200) {
             setCookie('auth', res.data, 1)
