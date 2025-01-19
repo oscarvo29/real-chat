@@ -10,6 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
+type ContextKey string
+
+const UuidKey ContextKey = "uuid"
+
 func GenerateToken(name string, uuid string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"name": name,
@@ -17,7 +21,8 @@ func GenerateToken(name string, uuid string) (string, error) {
 		"exp":  time.Now().Add(time.Hour * 2).Unix(),
 	})
 
-	return token.SignedString([]byte(JWT_SECRET))
+	JWT_KEY := GetEnvValue("JWT_TOKEN")
+	return token.SignedString([]byte(JWT_KEY))
 }
 
 func VerifyToken(tokenInput string) (string, error) {
@@ -28,7 +33,8 @@ func VerifyToken(tokenInput string) (string, error) {
 			return nil, errors.New("unexpected signing method")
 		}
 
-		return []byte(JWT_SECRET), nil
+		JWT_KEY := GetEnvValue("JWT_TOKEN")
+		return []byte(JWT_KEY), nil
 	})
 	if err != nil {
 		fmt.Println(err)

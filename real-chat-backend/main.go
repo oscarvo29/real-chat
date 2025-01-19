@@ -12,7 +12,8 @@ import (
 type Config struct{}
 
 func main() {
-	repositories.GetConnection(utils.DSN)
+	DSN := utils.GetEnvValue("DSN")
+	repositories.GetConnection(DSN)
 
 	app := Config{}
 
