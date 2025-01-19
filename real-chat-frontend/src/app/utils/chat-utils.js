@@ -2,12 +2,11 @@ const { default: axios } = require("axios");
 import Cookies from 'js-cookie';
 import { GetURL } from './http-store';
 
-export async function FetchChatHistory(receiverUuid) {
+export async function FetchChatHistory(chatId) {
     const jwtToken = Cookies.get("auth")
     if (jwtToken === "") {
         return
     }
-    console.log("Receiver uiid: ",receiverUuid)
 
     const config = {
         headers: {
@@ -16,15 +15,7 @@ export async function FetchChatHistory(receiverUuid) {
         }
     }
     
-
-    const body = {
-        'receiver_uuid': receiverUuid,
-    }
-
-
-    
-    // let res = await axios.post('http://127.0.0.1:80/messages/get-chat-history', body, config)
-    let res = await axios.post(GetURL('messages/get-chat-history'), body, config)
+    let res = await axios.get(GetURL(`messages/get-chat-history/${chatId}`), config)
     if (res.status !== 200 ) {
         return []
     }

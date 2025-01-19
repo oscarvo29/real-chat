@@ -8,27 +8,31 @@ import (
 )
 
 type Message struct {
-	MessageId    uuid.UUID    `json:"message_id,omitempty"`
-	SenderUuid   uuid.UUID    `json:"sender_uuid,omitempty"`
-	ReceiverUuid uuid.UUID    `json:"receiver_uuid"`
-	MessageValue string       `json:"message_value"`
-	SendTime     time.Time    `json:"send_time,omitempty"`
-	Read         bool         `json:"read,omitempty"`
-	ReadAt       sql.NullTime `json:"read_at,omitempty"`
+	MessageId    uuid.UUID     `json:"message_id,omitempty"`
+	ChatId       uuid.UUID     `json:"chat_id"`
+	SenderUuid   uuid.UUID     `json:"sender_uuid,omitempty"`
+	MessageValue *string       `json:"message_value"`
+	SendTime     *time.Time    `json:"send_time,omitempty"`
+	Read         *bool         `json:"read,omitempty"`
+	ReadAt       *sql.NullTime `json:"read_at,omitempty"`
+	IsSender     bool          `json:"is_sender"`
 }
 
 type ShortMessage struct {
-	SenderJWT    string    `json:"jwt"`
-	ReceiverUuid uuid.UUID `json:"receiver_uuid"`
-	Message      string    `json:"message"`
+	SenderJWT string    `json:"jwt"`
+	ChatId    uuid.UUID `json:"chat_id"`
+	Message   string    `json:"message"`
 }
 
-func NewMessage(senderUiid, receiverUuid uuid.UUID, messageValue string) *Message {
+func NewMessage(senderUiid, chatId uuid.UUID, messageValue string) *Message {
+	now := time.Now()
+	read := false
+
 	return &Message{
 		SenderUuid:   senderUiid,
-		ReceiverUuid: receiverUuid,
-		MessageValue: messageValue,
-		SendTime:     time.Now(),
-		Read:         false,
+		ChatId:       chatId,
+		MessageValue: &messageValue,
+		SendTime:     &now,
+		Read:         &read,
 	}
 }

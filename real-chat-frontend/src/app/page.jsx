@@ -18,29 +18,27 @@ export default async function page() {
     redirect('/login')
   }
 
-  let users = []
+  let chatRooms = []
 
 
-  const res = await axios.get(GetURL('users/all-users'), {
+  const res = await axios.get(GetURL('messages/get-chats'), {
       headers: {
         'Authorization': auth.value
       }
   })
-
+  console.log("res status code: ", res.status)
   if (res.status === 200) {
-    users = res.data
+    chatRooms = res.data
+    console.log("Chatrooms", chatRooms)
   }
 
-  const updateActiveUser = (userIdx) => {
-    activeChat = users[userIdx]
-  }
 
   return (
     <div className='mx-auto w-1/2 grid grid-cols-5 gap-4'>      
       <h1>HEJ MATE</h1>
       <Navbar />
 
-      <ChatBox users={users}/>
+      <ChatBox chatRooms={chatRooms}/>
 
       
     </div>

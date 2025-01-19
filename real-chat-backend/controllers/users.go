@@ -14,7 +14,6 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Something went wrong with the server, when trying to parse the uuid.", http.StatusInternalServerError)
 	}
 
-
 	if uuid == "" {
 		http.Error(w, "User Unathorized. Try to log in again.", http.StatusUnauthorized)
 	}

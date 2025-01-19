@@ -2,55 +2,16 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 
-	"github.com/google/uuid"
+	"github.com/go-chi/chi/v5"
 	"github.com/oscarvo29/real-chat-backend/models"
 	"github.com/oscarvo29/real-chat-backend/services"
 	"github.com/oscarvo29/real-chat-backend/utils"
 )
 
-func NewMessage(w http.ResponseWriter, r *http.Request) {
-	senderUuid, ok := r.Context().Value(utils.UuidKey).(string)
-	if !ok {
-		http.Error(w, "Something went wrong with the server, when trying to parse the uuid.", http.StatusInternalServerError)
-	}
-
-	if senderUuid == "" {
-		http.Error(w, "user not authorized", http.StatusUnauthorized)
-	}
-
-	var newMsg models.Message
-	err := utils.ParseJsonObject(r.Body, &newMsg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	newMsg.SenderUuid, err = uuid.Parse(senderUuid)
-	if err != nil {
-		http.Error(w, "user id is not correct.", http.StatusUnauthorized)
-	}
-
-	err = services.SaveMessage(&newMsg)
-	if err != nil {
-		log.Fatal(err)
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-	}
-
-	jsonData, err := json.Marshal(newMsg)
-	if err != nil {
-		panic(err)
-	}
-
-	w.Header().Set("Content-type", "application/json")
-	_, err = w.Write(jsonData)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func ChatHistory(w http.ResponseWriter, r *http.Request) {
+func CreateChat(w http.ResponseWriter, r *http.Request) {
 	senderUuidString, ok := r.Context().Value(utils.UuidKey).(string)
 	if !ok {
 		http.Error(w, "Something went wrong with the server, when trying to parse the uuid.", http.StatusInternalServerError)
@@ -60,32 +21,84 @@ func ChatHistory(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "user not authorized", http.StatusUnauthorized)
 	}
 
-	senderUuid, err := uuid.Parse(senderUuidString)
+	var chat models.Chat
+	err := utils.ParseJsonObject(r.Body, &chat)
 	if err != nil {
-		http.Error(w, "user id is not correct.", http.StatusUnauthorized)
+		http.Error(w, "could not convert the ids.", http.StatusUnauthorized)
+		return
+	}
+	chat.Participants = append(chat.Participants, senderUuidString)
+	err = services.CreateChat(&chat)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "could not create the chat", http.StatusInternalServerError)
+		return
 	}
 
-	var chatHistoryRequest models.ChatHistory
-	err = utils.ParseJsonObject(r.Body, &chatHistoryRequest)
+	jsonData, err := json.Marshal(chat)
 	if err != nil {
-		log.Fatal(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-
+		http.Error(w, "Problem converting chat into json data.", http.StatusInternalServerError)
+		return
 	}
 
-
-
-	chatHistory, err := services.GetAllChatMessages(senderUuid, chatHistoryRequest.ReceiverUuid)
-	if err != nil {
-		log.Fatal(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-
-	}
-	jsonData, err := json.Marshal(chatHistory)
+	w.WriteHeader(http.StatusCreated)
+	_, err = w.Write(jsonData)
 	if err != nil {
 		panic(err)
 	}
 
+}
+
+func GetAllChatsForUser(w http.ResponseWriter, r *http.Request) {
+	senderUuid, err := utils.TransFormJWT(r)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "user id is not correct.", http.StatusUnauthorized)
+		return
+	}
+
+	chats, err := services.GetChatRooms(senderUuid)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong when trying to load users chats", http.StatusInternalServerError)
+		return
+	}
+
+	jsonData, err := json.Marshal(&chats)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-type", "application/json")
+	_, err = w.Write(jsonData)
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+func ChatHistory(w http.ResponseWriter, r *http.Request) {
+	chatId := chi.URLParam(r, "chatId")
+	senderUuid, err := utils.TransFormJWT(r)
+	if err != nil {
+		fmt.Println("err: ", err)
+		http.Error(w, "There was a problem. Try to logout and in again.", http.StatusInternalServerError)
+	}
+
+	messages, err := services.GetChatHistory(chatId, senderUuid)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong when trying to load users chats", http.StatusInternalServerError)
+		return
+	}
+
+	jsonData, err := json.Marshal(&messages)
+	if err != nil {
+		panic(err)
+	}
+
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-type", "application/json")
 	_, err = w.Write(jsonData)
 	if err != nil {

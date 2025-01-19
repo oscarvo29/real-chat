@@ -3,9 +3,11 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 func GenerateToken(name string, uuid string) (string, error) {
@@ -49,4 +51,19 @@ func VerifyToken(tokenInput string) (string, error) {
 	}
 
 	return uuid, nil
+}
+
+func TransFormJWT(r *http.Request) (uuid.UUID, error) {
+	var senderUuid uuid.UUID
+
+	senderUuidString, ok := r.Context().Value(UuidKey).(string)
+	if !ok {
+		return senderUuid, errors.New("error when trying to convert jwt to string")
+	}
+
+	if senderUuidString == "" {
+		return senderUuid, errors.New("no jwt was found")
+	}
+
+	return uuid.Parse(senderUuidString)
 }

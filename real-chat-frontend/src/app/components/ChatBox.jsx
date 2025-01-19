@@ -7,20 +7,21 @@ import Cookies from 'js-cookie'
 import {FetchChatHistory, SendChatRequest} from '../utils/chat-utils'
 import ChatBubble from './ChatBubble'
 import { GetSocketConnection } from '../utils/socket'
+import CreateChat from './CreateChat'
+import { Button } from '@material-tailwind/react'
 
 
 
-export default function ChatBox({ users }) {
-    const [chatChosen, setChatChosen] = useState(false)
+export default function ChatBox({ chatRooms }) {
+    const [chatChosen, setChatChosen] = useState(false) // TODO: lav check på om activeChat er sat i stedet.
+    const [ openModal, setOpenModal] = useState(false)
     const [activeChat, setActiveChat] = useState({})
     const [chatLog, setChatLog] = useState([])
-    const [input, setInput] = useState("")
     const [socket, setSocket] = useState(null)
 
-    
-    
 
     useEffect(() => {
+        console.log(chatRooms)
         const jwtToken = Cookies.get("auth")
 
         const ws = GetSocketConnection(jwtToken)
@@ -39,21 +40,22 @@ export default function ChatBox({ users }) {
         };
     }, [])
 
-    const handleUserClick = async (userIndex) => {
-        setActiveChat(users[userIndex]) 
+    const handleUserClick = async (chatIndex) => {
+        setActiveChat(chatRooms[chatIndex]) 
     }
 
     useEffect(() => {
         // checks wether or not, an active chat have been chosen. 
         if (Object.keys(activeChat).length !== 0) {
             setChatChosen(true)
-            FetchChatHistory(activeChat.uuid).then((data) => {
+            FetchChatHistory(activeChat.chat_uuid).then((data) => {
+                console.log("data:")
+                console.log( data)
                 if (data) {
                     setChatLog((prev) => [...prev, ...data])
                 }
             })
         }
-
 
     }, [activeChat])
 
@@ -63,29 +65,34 @@ export default function ChatBox({ users }) {
         let msgValue = msgField.value
         const jwtToken = Cookies.get("auth")
 
-        console.log(activeChat.uuid)
-
         const msg = {
             "event": "message",
             "jwt": jwtToken,
             "data": {
                 "jwt": jwtToken,
-                "receiver_uuid": activeChat.uuid,
+                "chat_id": activeChat.chat_uuid,
                 "message": msgValue,
             }
         }
 
         if (socket && socket.readyState === WebSocket.OPEN) {
+            console.log("msg send.")
             socket.send(JSON.stringify(msg))
         }
 
         msgField.value = ""
     }
 
+    const closeModalBox = () => setOpenModal((prevState) => !prevState)
+
     return (
         <>
+            <CreateChat open={openModal} handleOpen={closeModalBox} />
+            <div className="col-span-5 flex justify-end">
+                    <Button className="btn rounded " onClick={closeModalBox} >Create new Chat!</Button>
+            </div>
             <ul>
-                {users.map((user, index) => <UserButtons key={user.uuid} user={user} index={index} handler={handleUserClick} />)}
+                {chatRooms.map((room, index) => <UserButtons key={room.chat_uuid} name={room.chat_name} index={index} handler={handleUserClick} />)}
             </ul>
             <div className="col-span-3 rounded border-2 grid grid-cols-5">
                 { chatChosen === false ? (
@@ -99,10 +106,10 @@ export default function ChatBox({ users }) {
                         ) : (
                             chatLog.map((chatItem, index) => {
 
-                                if(chatItem.sender_uuid === activeChat.uuid) {
-                                    return <ChatBubble key={`${index}:${chatItem.message_value}`} msg={chatItem.message_value} name={activeChat.name} sendAt={chatItem.send_time} receivedMsg={true}/>
+                                if(chatItem.is_sender) {
+                                    return <ChatBubble key={`${index}:${chatItem.message_value}`} msg={chatItem.message_value} name="" sendAt={chatItem.send_time} receivedMsg={false}/>
                                 } else {
-                                    return <ChatBubble key={`${index}:${chatItem.message_value}`} msg={chatItem.message_value} name="Ozzz" sendAt={chatItem.send_time} receivedMsg={false}/>
+                                    return <ChatBubble key={`${index}:${chatItem.message_value}`} msg={chatItem.message_value} name="" sendAt={chatItem.send_time} receivedMsg={true}/>
                                 }
                             })
                         )}

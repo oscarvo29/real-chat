@@ -40,8 +40,10 @@ func (app *Config) Routes() http.Handler {
 	mux.Group(func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware)
 		r.Route("/messages", func(r chi.Router) {
-			r.Post("/send-message", controllers.NewMessage)
-			r.Post("/get-chat-history", controllers.ChatHistory)
+			// r.Post("/send-message", controllers.NewMessage)
+			r.Post("/create-chat", controllers.CreateChat)
+			r.Get("/get-chats", controllers.GetAllChatsForUser)
+			r.Get("/get-chat-history/{chatId}", controllers.ChatHistory)
 
 		})
 	})

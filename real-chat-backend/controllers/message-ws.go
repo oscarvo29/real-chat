@@ -53,7 +53,6 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 			}
 			clients[uuid] = conn
 		case "message":
-
 			var shortMsg models.ShortMessage
 			jsonData, err := json.Marshal(socketConn.Data)
 			if err != nil {
@@ -76,15 +75,14 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			mUuid, err := uuid.Parse(uiidStr)
+			senderId, err := uuid.Parse(uiidStr)
 			if err != nil {
 				fmt.Println("error converting uuid string: ", err)
 				conn.Close()
 				return
 			}
 
-			newMsg := models.NewMessage(mUuid, shortMsg.ReceiverUuid, shortMsg.Message)
-			fmt.Println(newMsg)
+			newMsg := models.NewMessage(senderId, shortMsg.ChatId, shortMsg.Message)
 			err = services.SaveMessage(newMsg)
 			if err != nil {
 				fmt.Println("Error saving message: ", err)
@@ -92,19 +90,27 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			clientConn, ok := clients[newMsg.ReceiverUuid.String()]
-			if ok {
-				err = clientConn.WriteJSON(newMsg)
-				if err != nil {
-					fmt.Println("Error when writing msg to receiver: ", err)
-				}
-			}
-
-			err = conn.WriteJSON(newMsg)
+			receipiants, err := services.GetReceipiants(newMsg.ChatId)
 			if err != nil {
-				fmt.Println("Error when writing msg to sender: ", err)
+				fmt.Println("Error when trying to get receipiants for the message: ", err)
 				conn.Close()
 				return
+			}
+			for _, receipiant := range receipiants {
+				key := *receipiant
+
+				clientConn, ok := clients[key]
+				if ok {
+					if newMsg.SenderUuid.String() == key {
+						newMsg.IsSender = true
+					}
+
+					err = clientConn.WriteJSON(newMsg)
+					if err != nil {
+						fmt.Println("Error when writing msg to receiver: ", err)
+					}
+					newMsg.IsSender = false
+				}
 			}
 		case "conn_close":
 			uuid, err := utils.VerifyToken(socketConn.Jwt)
