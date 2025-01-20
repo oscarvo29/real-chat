@@ -34,7 +34,7 @@ func VerifyToken(tokenInput string) (string, error) {
 		}
 
 		JWT_KEY := GetEnvValue("JWT_TOKEN")
-		return []byte(JWT_KEY), nil
+		return []byte(JWT_KEY ), nil
 	})
 	if err != nil {
 		fmt.Println(err)
