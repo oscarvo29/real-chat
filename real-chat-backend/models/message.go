@@ -11,10 +11,10 @@ type Message struct {
 	MessageId    uuid.UUID     `json:"message_id,omitempty"`
 	ChatId       uuid.UUID     `json:"chat_id"`
 	SenderUuid   uuid.UUID     `json:"sender_uuid,omitempty"`
-	MessageValue *string       `json:"message_value"`
-	SendTime     *time.Time    `json:"send_time,omitempty"`
-	Read         *bool         `json:"read,omitempty"`
-	ReadAt       *sql.NullTime `json:"read_at,omitempty"`
+	MessageValue string       `json:"message_value"`
+	SendTime     time.Time    `json:"send_time,omitempty"`
+	Read         bool         `json:"read,omitempty"`
+	ReadAt       sql.NullTime `json:"read_at,omitempty"`
 	IsSender     bool          `json:"is_sender"`
 }
 
@@ -31,8 +31,8 @@ func NewMessage(senderUiid, chatId uuid.UUID, messageValue string) *Message {
 	return &Message{
 		SenderUuid:   senderUiid,
 		ChatId:       chatId,
-		MessageValue: &messageValue,
-		SendTime:     &now,
-		Read:         &read,
+		MessageValue: messageValue,
+		SendTime:     now,
+		Read:         read,
 	}
 }

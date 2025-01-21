@@ -3,6 +3,8 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -98,7 +100,6 @@ func GetAllChatsForUser(activeUuid uuid.UUID) ([]*models.Chat, error) {
 	for row.Next() {
 		var chat models.Chat
 		var latestMessageId sql.NullString
-		var msg models.Message
 
 		err = row.Scan(
 			&chat.ChatUuid,
@@ -111,7 +112,11 @@ func GetAllChatsForUser(activeUuid uuid.UUID) ([]*models.Chat, error) {
 		}
 
 		if latestMessageId.Valid {
-			chat.LatestMessage = &msg
+			msg, err := GetMessage(latestMessageId.String)
+			if err != nil {
+				log.Fatal(err)
+			}
+			chat.LatestMessage = msg
 		} else {
 			chat.LatestMessage = nil
 		}
@@ -163,6 +168,57 @@ func GetChatHistory(chatId uuid.UUID, senderUuid uuid.UUID) ([]*models.Message, 
 	}
 
 	return messages, nil
+}
+
+// func GetMessage(messageId string, msg *models.Message) error {
+// 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+// 	defer cancel()
+// 	fmt.Println("Message ID: ", messageId)
+
+// 	query := `SELECT * FROM messages WHERE message_id = $1;`
+// 	row, err := DB.QueryContext(ctx, query, messageId)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	err = row.Scan(
+// 		&msg.MessageId,
+// 		&msg.ChatId,
+// 		&msg.SenderUuid,
+// 		&msg.MessageValue,
+// 		&msg.SendTime,
+// 		&msg.Read,
+// 		&msg.ReadAt,
+// 	)
+
+// 	return err
+// }
+
+func GetMessage(messageId string) (*models.Message, error) {
+	var msg models.Message
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+	fmt.Println("Message ID: ", messageId)
+
+	query := `SELECT * FROM messages WHERE message_id = $1;`
+	row, err := DB.QueryContext(ctx, query, messageId)
+	if err != nil {
+		return &msg, err
+	}
+
+	for row.Next() {
+		err = row.Scan(
+			&msg.MessageId,
+			&msg.ChatId,
+			&msg.SenderUuid,
+			&msg.MessageValue,
+			&msg.SendTime,
+			&msg.Read,
+			&msg.ReadAt,
+		)
+	}
+
+	return &msg, err
 }
 
 func GetReceipiants(chatId uuid.UUID) ([]*string, error) {
