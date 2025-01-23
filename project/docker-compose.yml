@@ -1,4 +1,3 @@
-version: '1'
 
 services:
 
@@ -9,6 +8,15 @@ services:
     restart: always
     ports:
       - "80:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  chat-listener:
+    build:
+      context: ./../chat-listener
+      dockerfile: ./../chat-listener/chat-listener.dockerfile
+    restart: always
     deploy:
       mode: replicated
       replicas: 1

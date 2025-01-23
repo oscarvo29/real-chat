@@ -9,10 +9,6 @@ import (
 	"github.com/oscarvo29/real-chat-backend/middleware"
 )
 
-type contextKey string
-
-const uuidKey contextKey = "uuid"
-
 func (app *Config) Routes() http.Handler {
 	mux := chi.NewRouter()
 
